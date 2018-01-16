@@ -42,8 +42,8 @@ ConfigPlugin.prototype.apply = function(compiler) {
     compiler.plugin("environment", function() {
 
         var
-            importedAliases = {},
-            webpackAliases = compiler.options.resolve.alias;
+            compiledAliasesList = {},
+            importedAliases = {};
 
         logInfo("Merging config files from different modules if possible...");
 
@@ -89,13 +89,19 @@ ConfigPlugin.prototype.apply = function(compiler) {
             if (config.webpackConfig.resolve) {
                 if (config.webpackConfig.resolve.alias) {
                     importedAliases[moduleName] = config.webpackConfig.resolve.alias;
+
+                    logInfo("... read", Object.keys(config.webpackConfig.resolve.alias).length, "alises");
                 }
             }
         });
 
         _.each(importedAliases, function (aliases, moduleName) {
-            webpackAliases = _.extend(webpackAliases, aliases);
+            compiledAliasesList = _.extend(compiledAliasesList, aliases);
         });
+
+        compiler.options.resolve.alias = _.extend(compiledAliasesList, compiler.options.resolve.alias);
+
+        //logInfo("Aliases are: ", compiler.options.resolve.alias);
 
     }.bind(this));
 };
